@@ -8,6 +8,9 @@
 *.vscode
 *.pyc
 setup.cfg
+.vs/*
+*.pyproj
+package-lock.json
 
 # Windows image file caches
 Thumbs.db
@@ -46,3 +49,6 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Modules
+node_modules/*

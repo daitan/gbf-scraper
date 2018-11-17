@@ -15,7 +15,7 @@ from config import config
 from csv_parse import csv_parse
 from selenium import webdriver
 
-GW_NUMBER = 33
+GW_NUMBER = 41
 CHROME_ARGUMENTS = '--disable-infobars'
 
 LOG_FILE = '[{}]granblue-scraper.log'.format(strftime('%m-%d_%H%M'))
@@ -88,27 +88,32 @@ def parser(data, parse_type, **kwargs):
     if parse_type == 'gw_individual':
         data = data['list']
         for k in data:
-            k = data[k]
-            rows.append((k['rank'], k['name'], k['total_defeat'],
-                         k['contribution'], k['level'], k['user_id']))
+            try:
+                rows.append((k['rank'], k['name'], k['defeat'],
+                             k['point'], k['level'], k['user_id']))
+            except IndexError:
+                continue
         return rows
 
     elif parse_type == 'guild_members':
         data = data['list']
         for k in data:
-            rows.append((k['name'], k['level'], k['member_position_name'],
-                         k['id'], kwargs['faction_name'], kwargs['guild_name'],
-                         kwargs['guild_id']))
+            try:
+                rows.append((k['name'], k['level'], k['member_position_name'],
+                        k['id'], kwargs['faction_name'], kwargs['guild_name'],
+                        kwargs['guild_id']))
+            except IndexError:
+                continue
         return rows
 
     elif parse_type == 'gw_guild':
-        data = list(data['list'].items())
-        for k in range(0, 10):
+        data = data['list']
+        for k in data:
             try:
-                pid = data[k][1]['id']
-                name = data[k][1]['name']
-                honors = data[k][1]['point']
-                rank = data[k][1]['ranking']
+                pid = data[k]['id']
+                name = data[k]['name']
+                honors = data[k]['point']
+                rank = data[k]['ranking']
                 rows.append((rank, name, honors, pid))
             except IndexError:
                 continue
@@ -117,7 +122,10 @@ def parser(data, parse_type, **kwargs):
     elif parse_type == 'guild_ranks':
         data = data['list']
         for k in data:
-            rows.append((k['level'],))
+            try:
+                rows.append((k['level'],))
+            except IndexError:
+                continue
         return rows
 
     elif parse_type == 'guild_info':
@@ -207,6 +215,7 @@ def guild_members():
     makedirs(directory, exist_ok=True)
     csv_writer(header, filename, write_rows=False)
     guilds = csv_parse()
+    print(guilds)
 
     for guild in guilds:
         try:
@@ -227,9 +236,9 @@ def guild_members():
 
 
 def gw_guild(first, last, seed_first, seed_last):
-    baseurl = 'http://game.granbluefantasy.jp/teamraid0{}/ranking_guild/detail/{}'.format(
+    baseurl = 'http://game.granbluefantasy.jp/teamraid0{}/rest/ranking/guild/detail/{}'.format(
         GW_NUMBER, {})
-    header = ('rank', 'name', 'battles', 'honor', 'id')
+    header = ('rank', 'name', 'honor', 'id')
     directory = CFG.base_dir + '\\GW{}\\Guilds\\Ranking\\'.format(GW_NUMBER)
     filename = directory + '[{}]Preliminary_Guild_Rankings.csv'.format(
         strftime('%m-%d_%H%M'))
@@ -239,7 +248,7 @@ def gw_guild(first, last, seed_first, seed_last):
     csv_writer(header, filename, write_rows=False)
     handler(baseurl, 'gw_guild', first, last, filename=filename)
 
-    baseurl = 'http://game.granbluefantasy.jp/teamraid0{}/ranking_seedguild/detail/{}'.format(
+    baseurl = 'http://game.granbluefantasy.jp/teamraid0{}/rest_ranking_seedguild/detail/{}'.format(
         GW_NUMBER, {})
     filename = directory + \
         '[{}]Seed_Guild_Rankings.csv'.format(strftime('%m-%d_%H%M'))
