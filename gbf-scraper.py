@@ -110,10 +110,10 @@ def parser(data, parse_type, **kwargs):
         data = data['list']
         for k in data:
             try:
-                pid = data[k]['id']
-                name = data[k]['name']
-                honors = data[k]['point']
-                rank = data[k]['ranking']
+                pid = k['id']
+                name = k['name']
+                honors = k['point']
+                rank = k['ranking']
                 rows.append((rank, name, honors, pid))
             except IndexError:
                 continue

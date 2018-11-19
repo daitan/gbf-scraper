@@ -11,6 +11,7 @@ setup.cfg
 .vs/*
 *.pyproj
 package-lock.json
+*.sln
 
 # Windows image file caches
 Thumbs.db
